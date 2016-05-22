@@ -10,6 +10,6 @@ public class AppController {
 	@RequestMapping("/")
 	@ResponseBody
 	public String getApp(){
-		return "app";
+		return "Application is UP and Running !";
 	}
 }
