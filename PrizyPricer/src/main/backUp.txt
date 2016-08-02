@@ -1,1 +1,204 @@
-Test file 
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" ng-controller='appController'
+	ng-App="mercuryAnywhere">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Mercury Mobile</title>
+<link rel="shortcut icon" href="images/Favicon.ico" type="image/x-icon" /> 
+
+<!-- inject-vendor:css -->
+<link href="css/lib/bootstrap-submenu.min.css" rel="stylesheet" />
+<link href="css/lib/bootstrap.css" rel="stylesheet" />
+<link href="css/lib/loading.css" rel="stylesheet" />
+<!-- endinject -->
+
+<!-- inject:css -->
+<link ng-href="css/meetingsView.common.css" rel="stylesheet" />
+<link ng-href="css/meetingsView.default.css" rel="stylesheet" />
+<link ng-href="css/meetingsView.black.css" rel="stylesheet" />
+<!-- endinject -->
+
+<!-- inject-vendor:js -->
+<script src="js/lib/moment.js"></script>
+<script src="js/lib/moment-timezone.js"></script>
+<script src="js/lib/angular.js"></script>
+<script src="js/lib/angular-ui-router.js"></script>
+<script src="js/lib/svgxuse.min.js"></script>
+<script src="js/lib/jquery-1.11.3.js"></script>
+<script src="js/lib/bootstrap.js"></script>
+<script src="js/lib/bootstrap-submenu.min.js"></script>
+<!-- endinject -->
+
+<!-- inject:js -->
+<script src="js/app.js"></script>
+<script src="js/appCtrl.js"></script>
+<script src="js/mercuryAnywhereServices.js"></script>
+<script src="js/meetingViewCtrl.js"></script>
+<script src="js/infoPackCtrl.js"></script>
+<script src="js/loading.js"></script>
+<!-- endinject -->
+</head>
+<body class="mv-body"
+	ng-class="[theme, {'mv-disabled' : spinnerActive || dataInconsistent}]" ng-cloak="">
+	<spinner></spinner>
+
+	<div id="wrapper" ng-class="{'toggled' : menuToggled}">
+
+		<div ng-click="toggleSideBar($event)" ng-show="spinnerActive || !menuToggled || dataInconsistent" > 
+			<div id="headerOverlay" class="mv-overlay mv-headerOverlay"></div>
+			<div id="contentOverlay" class="mv-overlay mv-contentOverlay"></div>
+		</div>
+		<!-- side bar -->
+		<div id="sidebar-wrapper" >
+			<ul class="sidebar-nav" style="text-align: center;">
+				<li ng-class="{'active' : selectedState.current.name.indexOf('meetings') > -1}" ng-click="changeState('meetings');"><a>Meetings View</a></li>
+				<li ng-class="{'active' : selectedState.current.name.indexOf('infoPack') > -1}" ng-click="changeState('infoPack');"><a>InfoPack View</a></li>
+			</ul>
+		</div>
+		<!-- side bar ends -->
+
+		<!-- page content -->
+			<div class="container-fluid"
+				th:attr="ng-init='refreshInterval=\''+${refreshTime}+'\''">
+				<div class="row mv-header">
+					<div class="col-lg-8 col-md-7 col-xs-7" style="padding-right: 0px;">
+						<div class="col-lg-1 col-xs-2 mv-nopadding">
+							<svg class="mv-svg-32" ng-click="toggleSideBar($event)"
+								ng-show="menuToggled">
+								<use xlink:href="images/icons.svg#menuicon"></use>
+							</svg>
+							<svg class="mv-svg-32" ng-click="toggleSideBar($event)"
+								ng-hide="menuToggled">
+								<use xlink:href="images/icons.svg#menuiconopen"></use>
+							</svg>
+						</div>
+						<div class="col-lg-11 col-xs-10 mv-nopadding">
+							<h1 style="margin-top: 10px !important;">
+								<strong>{{selectedState.current.name.indexOf('infoPack')
+									> -1 ? 'InfoPack View' : 'Meetings View'}}</strong>
+							</h1>
+						</div>
+					</div>
+					<div class="col-lg-4 col-md-5 col-xs-5 mv-icons-padding">
+						<div class="col-md-4 col-xs-3 mv-nopadding-lg" >
+							<a data-submenu ng-click id="regionsDiv" data-toggle="dropdown"
+								aria-haspopup="true" aria-expanded="false"
+								class="dropdown-toggle mv-filter">
+								<div class="col-md-2 col-xs-12 mv-user">
+									<svg class="mv-svg-14">
+									<use xlink:href="images/icons.svg#regionicon"></use>
+								</svg>
+								</div>
+
+								<div class="col-md-10 hidden-xs hidden-sm mv-user">
+									<h6>
+										<span style="margin-left: 5px; text-transform: capitalize;">{{regionLabel.toLowerCase()}}</span>
+									</h6>
+								</div>
+							</a>
+							<ul class="dropdown-menu mv-list-items"
+								aria-labelledby="regionsDiv">
+								<li ng-repeat="region in regions"
+									ng-class="{'mv-active' : isSelected(region) , 'dropdown-submenu' : region.countries != null}"
+									class="mv-dropdown"><a ng-click="onRegionSelect(region)">{{region.regionDescription}}</a>
+									<ul class="dropdown-menu">
+										<li ng-repeat="country in region.countries"
+											ng-class="{'mv-active' : isCountrySelected(country, region)}"
+											class="mv-dropdown"><a
+											ng-click="onCountrySelect(country,region)"
+											style="text-transform: capitalize;">
+												{{country.countryDescription.toLowerCase()}} </a></li>
+										<li class="hidden-sm hidden-md hidden-lg divider"></li>
+									</ul></li>
+							</ul>
+						</div>
+						<div class="col-md-4 col-xs-3 mv-nopadding-lg" >
+							<a ng-click="" id="filterDiv" data-toggle="dropdown"
+								aria-haspopup="true" aria-expanded="true" class="mv-filter">
+								<div class="col-md-1 col-xs-12 mv-user">
+									<svg class="mv-svg-14">
+										<use xlink:href="images/icons.svg#filtericon"></use>
+									</svg>
+								</div>
+
+								<div class="col-md-11 hidden-xs hidden-sm mv-user">
+									<h6>
+										<span style="margin-left: 10px;">{{filterLabel +
+											searchText}}</span>
+									</h6>
+								</div>
+							</a>
+							<ul class="dropdown-menu mv-list-items"
+								aria-labelledby="filterDiv">
+								<li ng-repeat="filterType in filterList"
+									ng-class="{'mv-active' : isfilterTypeSelected(filterType)}"
+									class="mv-dropdown"><a
+									ng-click="onfilterTypeSelect(filterType)">{{filterType.filterLabel}}</a>
+								</li>
+								<li class="hidden-xs hidden-sm hidden-md mv-dropdown"
+									ng-click="onfilterTypeSelect(searchMeetings, $event)"
+									ng-class="{'mv-active' : isfilterTypeSelected(searchMeetings)}">
+									<input class="mv-text" maxlength="7" ng-model="searchText"
+									placeholder="Search Meetings..." />
+								</li>
+							</ul>
+						</div>
+						<div class="col-md-2 col-xs-3">
+							<div class="col-md-12 col-xs-12 mv-settings-img">
+								<a ng-click="" id="settingsDiv" data-toggle="dropdown"
+									aria-haspopup="true" aria-expanded="true"> <svg
+										class="mv-svg-19">
+									<use xlink:href="images/icons.svg#settingsicon"></use>
+								</svg>
+								</a>
+								<ul class="dropdown-menu mv-list-items"
+									aria-labelledby="settingsDiv" style="color: #515B6B;">
+									<li
+										style="border-bottom: 1px solid #E6E7E8; padding: 7px 0 7px 0"><svg
+											class="mv-svg-18">
+									<use xlink:href="images/icons.svg#usericon"></use>
+								</svg><span class="mv-setting">{{userName}}</span></li>
+									<li style="padding-top: 5px;" ng-click="switchTheme()"><svg
+											class="mv-svg-18">
+									<use xlink:href="images/icons.svg#themeicon"></use>
+								</svg><span class="mv-setting">Change Theme</span></li>
+									<li style="padding-top: 5px;" ng-click="savePreference()"><svg
+											class="mv-svg-18">
+									<use xlink:href="images/icons.svg#saveicon"></use>
+								</svg><span class="mv-setting">Save Preferences</span></li>
+								</ul>
+							</div>
+						</div>
+						<div class="col-md-2 col-xs-3">
+							<div class="col-md-12 col-xs-12 mv-refresh-img">
+								<a ng-click="onRefresh()"> <svg class="mv-svg-14">
+									<use xlink:href="images/icons.svg#refreshicon"></use>
+								</svg>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div ui-view class="mv-meetingbody"></div>
+				<div class="mv-alert"
+					ng-class="{ 'mv-stack-up': successFlag == 'Y' , 'mv-stack-down' : successFlag != 'Y'}">
+					<div class="mv-alert-success"
+						ng-class="{ 'fadeout': successFlag == 'N' , 'fadein' : successFlag == 'Y'}">
+						<h4>Saved successfully</h4>
+					</div>
+				</div>
+			</div>
+		<!-- page content ends -->
+
+	</div>
+	<div class="alert alert-success fade in mv-status-alert" ng-show="$root.dataInconsistent">
+	  <a href="#" class="close mv-status-alert-close" ng-click = "closeStatusAlert();" aria-label="close">&times;</a>
+	  The meeting has been updated by another user. Kindly refresh.
+	</div>
+</body>
+</html>
