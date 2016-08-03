@@ -1,0 +1,14 @@
+<project name="pmd-ant-task" default="pmd" basedir=".">
+	<target name="pmd">
+		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" />
+		<pmd rulesetfiles="pmd/pmd-rulesets.xml" failonerror="true" failOnRuleViolation="true" maxRuleViolations="1">
+			<formatter type="html" toFile="pmd_report.html">
+				<param name="linkPrefix" value="http://pmd.sourceforge.net/xref" />
+			</formatter>
+			<fileset dir=".">
+				<include name="**/*.java" />
+				<exclude name="**/src/test/java/**" />
+			</fileset>
+		</pmd>
+	</target>
+</project>
