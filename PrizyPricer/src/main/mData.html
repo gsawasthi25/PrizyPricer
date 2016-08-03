@@ -1,0 +1,220 @@
+<div class="panel-group" id="accordion">
+	<div class="panel panel-default"
+		ng-repeat="meeting in filteredMeetings = (meetings | filter : {region : selectedRegion, countryCode : selectedCountry, coordinatorCorpId : selectedCordinatorCorpId, hostCorpId: selectedHostCorpId, meetingAttendee: selectedMeetingAttendee} | filter : searchText | orderBy:['region','meetingStartTime'])">
+		<div class="panel-heading"  ng-class="selectedIndex == $index ? 'mv-panel-selected'  : 'mv-panel'">
+			<a data-toggle="collapse" data-parent="#accordion" ng-class="{'mv-ontime' : meeting.meetingStatus == 'On Time', 'mv-arrived' : meeting.meetingStatus == 'Arrived'
+				, 'mv-delayed' : meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'Cancelled' }"
+				href="#collapse{{$index}}" ng-click="setSelectedIndex($index)" >
+			<div class="row">
+				<div class="col-md-2 col-sm-2 col-xs-2">
+					<div class="col-xs-12" style="padding-left: 0px;">
+							<h4 style="margin: 0px;"
+								ng-class="{'mv-cancelled' : meeting.meetingStatus == 'Cancelled'}"
+								ng-if="meeting.region == 'APxJ'">{{convertToDate(meeting.region, meeting.meetingStartTime, 'HH:mm')}}</h4>
+							<h4 style="margin: 0px;"
+								ng-class="{'mv-cancelled' : meeting.meetingStatus == 'Cancelled'}"
+								ng-if="meeting.region == 'EUR'">{{convertToDate(meeting.region, meeting.meetingStartTime, 'HH:mm')}}</h4>
+							<h4 style="margin: 0px;"
+								ng-class="{'mv-cancelled' : meeting.meetingStatus == 'Cancelled'}"
+								ng-if="meeting.region == 'JP'">{{convertToDate(meeting.region, meeting.meetingStartTime, 'HH:mm')}}</h4>
+						</div>
+					<div class="col-xs-12" style="padding-left: 0px;">
+						<h5 style="margin: 5px 0px 5px 0px;">
+						<span ng-if="meeting.region == 'APxJ'">
+  							APxJ
+						</span>
+						<span ng-if="meeting.region == 'EUR'">
+  							EUR
+						</span>
+						<span ng-if="meeting.region == 'JP'">
+  							JP
+						</span>
+						</h5>
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-7 col-xs-8">
+					<div class="col-xs-12" style="padding-left: 0px;">
+						<h4 style="margin: 0px; text-transform: uppercase;"
+							ng-class="{'mv-cancelled' : meeting.meetingStatus == 'Cancelled'}">{{meeting.meetingCaption
+							+ ' ' +meeting.ticker}}</h4>
+					</div>
+					<div class="col-xs-12" style="padding-left: 0px;">
+						<h5 style="margin: 5px 0px 5px 0px;">{{meeting.hostDisplayName}}</h5>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-3 col-xs-2">
+					<div class="row">
+						<div class="col-md-5 col-sm-8 hidden-xs">
+							<h4
+								ng-class="{'mv-cancelled' : meeting.meetingStatus == 'Cancelled'}">{{meeting.meetingRoom}}</h4>
+						</div>
+						<div class="col-md-5 hidden-lg hidden-sm hidden-xs">
+								<div class="col-md-12" style="padding-left: 0px;">
+									<h4
+										ng-class="{'mv-status-delayed-label' : meeting.meetingStatus == 'Delayed'}">{{meeting.meetingStatus}}</h4>
+								</div>
+								<div ng-if="meeting.meetingStatus == 'Delayed'"
+									class="col-md-12" style="padding-left: 0px;">
+									<h5 class="mv-status-delayed-subtext">
+										<span ng-bind="'By ' + meeting.meetingDelayedBy + ' mins'"></span>
+									</h5>
+								</div>
+						</div>
+						<div ng-if="!statusUpdater || meeting.meetingStatus == 'Arrived' || meeting.meetingStatus == 'Cancelled'" class="col-lg-5 hidden-md hidden-xs hidden-sm">
+								<div class="col-md-12" style="padding-left: 0px;">
+									<h4
+										ng-class="{'mv-status-delayed-label' : meeting.meetingStatus == 'Delayed'}">{{meeting.meetingStatus}}</h4>
+								</div>
+								<div ng-if="meeting.meetingStatus == 'Delayed'"
+									class="col-md-12" style="padding-left: 0px;">
+									<h5 class="mv-status-delayed-subtext">
+										<span ng-bind="'By ' + meeting.meetingDelayedBy + ' mins'"></span>
+									</h5>
+								</div>
+							</div>
+							<div
+								ng-if="statusUpdater && (meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'On Time')"
+								class="col-lg-5 hidden-md hidden-xs hidden-sm">
+								<div class="dropdown col-md-12" style="padding-left: 0px">
+									<a data-toggle="dropdown" ng-class="{'mv-ontime' : meeting.meetingStatus == 'On Time',
+										'mv-delayed' : meeting.meetingStatus == 'Delayed'}" ng-click="delayedBy = null">
+										<div class="dropdown-toggle" id="statusDropDown"
+											aria-haspopup="true" aria-expanded="true">
+											<h4
+												ng-class="{'mv-status-delayed-label' : meeting.meetingStatus == 'Delayed'}">
+												{{meeting.meetingStatus}} <span class="caret"></span>
+											</h4>
+											<h5 ng-if="meeting.meetingStatus == 'Delayed'"
+												class="mv-status-delayed-subtext">
+												<span ng-bind="'By ' + meeting.meetingDelayedBy + ' mins'"></span>
+											</h5>
+										</div>
+									</a>
+
+									<ul class="dropdown-menu" aria-labelledby="statusDropDown" is-open="statusDropDownstate">
+										<li ng-show="meeting.meetingStatus == 'Delayed'"><a
+											href="#" ng-click="updateMeetingStatus(meeting.meetingId, 'ONTIME', 0, meeting.meetingStatus, meeting.meetingDelayedBy)">On Time</a></li>
+										<li
+											ng-show="meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'On Time'"><a
+											href="#" ng-click="updateMeetingStatus(meeting.meetingId, 'ARRIVED', 0, meeting.meetingStatus, meeting.meetingDelayedBy)">Arrived</a></li>
+										<li
+											ng-show="meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'On Time'"><a
+											href="" ng-click="setDelay($event, $(this));">Delayed</a></li>
+										<li><form name="delayedByForm">
+												<input type="number" ng-model="delayedBy"
+													name="delayedByField" min="1" max="1200"
+													ng-pattern="/^(0|([1-9]\d*))$/" class="mv-text"
+													style="width: 64%; line-height: 15px;"
+													placeholder="Delayed by..." required />
+
+												<button type="button" class="btn btn-default btn-xs" data-toggle="dropdown"
+													style="width: 17%; margin-top: -2px;"
+													ng-click="updateMeetingStatus(meeting.meetingId, 'DELAYED', delayedBy, meeting.meetingStatus, meeting.meetingDelayedBy)"
+													ng-disabled="delayedByForm.delayedByField.$invalid || delayedByForm.delayedByField.$error.max || delayedByForm.delayedByField.$error.min || delayedByForm.delayedByField.$error.required">Go</button>
+												<span class="mv-delayed-error"
+													ng-show="delayedByForm.delayedByField.$error.pattern">Please
+													enter a valid number.</span> <span class="mv-delayed-error"
+													ng-show="delayedByForm.delayedByField.$error.max">Maximum
+													delay can be 1200 minutes.</span> <span class="mv-delayed-error"
+													ng-show="delayedByForm.delayedByField.$error.min">Minimum
+													delay can be 1 minute.</span>
+											</form></li>
+									</ul>
+								</div>
+								</div>
+							<div class="col-md-2 col-sm-4 col-xs-12" style="float: right;">
+							<a data-toggle="collapse" data-parent="#accordion" href="#collapse{{$index}}"
+							 ng-click="setSelectedIndex($index)" >
+								<div
+									ng-class="{'mv-ontime-up' :  (selectedIndex == $index && meeting.meetingStatus == 'On Time' ),
+											'mv-ontime-down' : (selectedIndex != $index && meeting.meetingStatus == 'On Time'),
+											'mv-arrived-up' : selectedIndex == $index && meeting.meetingStatus == 'Arrived' ,
+											'mv-arrived-down' : selectedIndex != $index && meeting.meetingStatus == 'Arrived',
+											'mv-delayed-up' : selectedIndex == $index && (meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'Cancelled') ,
+											'mv-delayed-down' : selectedIndex != $index && (meeting.meetingStatus == 'Delayed' || meeting.meetingStatus == 'Cancelled')}">
+								</div>
+								</a>
+							</div>
+						</div>
+				</div>
+			</div>
+			</a>
+		</div>
+		<div id="collapse{{$index}}" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div class="row">
+				<div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+					<div class="row">
+						<div class="col-xs-3"><h5><strong>Room</strong></h5></div>
+						<div class="col-xs-9"><h5>{{meeting.meetingRoom}}</h5></div>
+					</div>
+				</div>
+				<div class="hidden-md hidden-lg col-sm-6" ng-if="meeting.meetingStatus != 'Delayed'">
+					<div class="row">
+						<div class="col-md-4 col-sm-3 col-xs-3" ><h5><strong>Status</strong></h5></div>
+						<div class="col-md-8 col-sm-9 col-xs-9"><h5>{{meeting.meetingStatus}}</h5></div>
+					</div>
+				</div>
+				<div class="hidden-md hidden-lg col-sm-6" ng-if="meeting.meetingStatus == 'Delayed'">
+					<div class="row">
+						<div class="col-md-4 col-sm-3 col-xs-3" ><h5><strong>Status</strong></h5></div>
+						<div class="col-md-8 col-sm-9 col-xs-9"><h5>{{meeting.meetingStatus + ' By '+ meeting.meetingDelayedBy + ' mins'}}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-5 col-sm-6">
+					<div class="row">
+						<div class="col-md-4 col-sm-3 col-xs-3"><h5><strong>Host</strong></h5></div>
+						<div class="col-md-8 col-sm-9 col-xs-9"><h5>{{meeting.hostDisplayName+' (' + (meeting.hostNumber == 'N/A' ? 'NA': meeting.hostNumber)  +')'}}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-6">
+					<div class="row">
+						<div class="col-md-5 col-sm-3 col-xs-3"><h5><strong>Subtype</strong></h5></div>
+						<div class="col-md-7 col-sm-9 col-xs-9"><h5>{{meeting.meetingSubtype == 'Not Applicable' || meeting.meetingSubtype == null ? 'NA': meeting.meetingSubtype }}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6">
+					<div class="row">
+						<div class="col-md-5 col-sm-3 col-xs-3" ><h5><strong>Country</strong></h5></div>
+						<div class="col-md-7 col-sm-9 col-xs-9 "><h5 style="text-transform:capitalize;">{{meeting.countryCode  != '' ?  getCountryName(meeting.region, meeting.countryCode).toLowerCase() : 'NA'}}</h5></div>
+					</div>
+				</div>
+			
+				<div class="col-md-5 col-sm-6">
+					<div class="row">
+						<div class="col-md-4 col-sm-3 col-xs-3"><h5><strong>Contact</strong></h5></div>
+						<div class="col-md-8 col-sm-9 col-xs-9"><h5>{{meeting.coordinatorDisplayName+' (' + (meeting.coordinatorNumber == 'N/A' ? 'NA': meeting.coordinatorNumber) +')'}}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-6 ">
+					<div class="row">
+						<div class="col-md-5 col-sm-3 col-xs-3" style="padding-right: 0px;"><h5><strong>Dial In</strong></h5></div>
+						<div class="col-md-7 col-sm-9 col-xs-9"><h5>{{meeting.dialInNumber != null ?  meeting.dialInNumber : 'NA' }}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6">
+					<div class="row">
+						<div class="col-md-5 col-sm-3 col-xs-3" style="padding-right: 0px;"><h5><strong>Dial Pin</strong></h5></div>
+						<div class="col-md-7 col-sm-9 col-xs-9"><h5 class="mv-pin">{{meeting.dialInPin  != null ?  meeting.dialInPin : 'NA'}}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-5 col-sm-6">
+					<div class="row">
+						<div class="col-md-4 col-sm-3 col-xs-3" ><h5><strong>Location</strong></h5></div>
+						<div class="col-md-8 col-sm-9 col-xs-9"><h5>{{meeting.location  != null ?  meeting.location : 'NA'}}</h5></div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-6 hidden-md hidden-sm hidden-xs">
+					<div class="row">
+						<div class="col-md-5"><h5><strong>Meeting Link</strong></h5></div>
+						<div class="col-md-7"><h5><span class="mv-meeting-link" ng-click="openLinkInWindow(meeting.meetingLink)">Click Here</span></h5></div>
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div ng-hide="filteredMeetings.length" class="mv-nomeetings">
+	<h4>No Current Meetings to Display</h4>
+</div>
